@@ -113,21 +113,21 @@ func Listen() {
     select {
       case msg := <- doorOpened:
         reply := msg.From.FirstName + " открыл(а) дверь"
-        log.Println(reply)
-        bot_msg := tgbotapi.NewMessage(msg.Chat.ID, reply)
-        bot.SendMessage(bot_msg)
+        send(msg.Chat.ID, reply)
       case msg := <- ledTurnedOn:
-        reply := msg.From.FirstName + "  включил(а) светодиод"
-        log.Println(reply)
-        bot_msg := tgbotapi.NewMessage(msg.Chat.ID, reply)
-        bot.SendMessage(bot_msg)
+        reply := msg.From.FirstName + " включил(а) светодиод"
+        send(msg.Chat.ID, reply)
       case msg := <- ledTurnedOff:
         reply := msg.From.FirstName + " выключил(а) светодиод"
-        log.Println(reply)
-        bot_msg := tgbotapi.NewMessage(msg.Chat.ID, reply)
-        bot.SendMessage(bot_msg)
+        send(msg.Chat.ID, reply)
     }
   }
+}
+
+func send(chatId int, msg string) {
+  log.Println(msg)
+  bot_msg := tgbotapi.NewMessage(chatId, msg)
+  bot.SendMessage(bot_msg)
 }
 
 func ListenUpdates() {
