@@ -1,1 +1,25 @@
 token: 138838673:AAHP-XONgU3wl68upNw--fArfnLod-72lTw
+allowed_chat_ids: 
+  - 50815686 
+  - -33208400
+open_door_phrases:
+  - open
+  - open the door
+  - open door
+  - door open
+  - дверь откройся
+  - открыть дверь
+  - открыть
+  - откройся, мразь
+  - откройся мразь
+  - открыть
+  - откройся
+  - открой
+  - сим-сим, откройся
+  - abrete sesamo
+turn_led_on_phrases:
+  - led on
+  - test on
+turn_led_off_phrases:
+  - led off
+  - test off
