@@ -22,10 +22,9 @@ type Config struct {
   Token             string `yaml:"token"`
   // Разрешенные айдишники чатов
   AllowedChatIds    []int `yaml:"allowed_chat_ids"`
+  MainChatId        int `yaml:"main_chat_id"`
   // Ключевые слова для открытия двери
   OpenDoorPhrases   []string `yaml:"open_door_phrases"`
-  TurnLedOnPhrases  []string `yaml:"turn_led_on_phrases"`
-  TurnLedOffPhrases []string `yaml:"turn_led_off_phrases"`
 }
 
 var bot *tgbotapi.BotAPI
@@ -35,10 +34,10 @@ var TurnLedOnPhrases []string
 var TurnLedOffPhrases []string
 var AllowedChatIds []int
 var doorOpened chan *tgbotapi.Message
-var ledTurnedOn chan *tgbotapi.Message
-var ledTurnedOff chan *tgbotapi.Message
+var doorOpenedByButton chan struct{}
 var doorPin = rpio.Pin(10)
-var ledPin = rpio.Pin(9)
+var doorReadPin = rpio.Pin(25)
+// var ledPin = rpio.Pin(9)
 
 func readConfig() (*Config, error) {
   var yamlFile []byte
@@ -74,17 +73,13 @@ func main() {
   }
   defer rpio.Close()
   // Устанавливаем пины на output
-  ledPin.Output()
   doorPin.Output()
+  doorReadPin.Input()
 
   // Инициализируем все остальные переменные 
   doorOpened = make(chan *tgbotapi.Message)
-  ledTurnedOn = make(chan *tgbotapi.Message)
-  ledTurnedOff = make(chan *tgbotapi.Message)
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
-  TurnLedOnPhrases = config.TurnLedOnPhrases
-  TurnLedOffPhrases = config.TurnLedOffPhrases
   log.Printf("Authorized on account %s", bot.Self.UserName)
 
   var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
@@ -93,6 +88,7 @@ func main() {
 
   // Слушаем события
   go Listen()
+  go ListenDoor()
   ListenUpdates()
 }
 
@@ -102,26 +98,21 @@ func OpenDoor() chan<- *tgbotapi.Message {
   return (chan<-*tgbotapi.Message)(doorOpened)
 } 
 
-func TurnLedOn() chan<- *tgbotapi.Message {
-  // Включаем светодиод
-  ledPin.High()
-  return (chan<-*tgbotapi.Message)(ledTurnedOn)
-}
-
-func TurnLedOff() chan<- *tgbotapi.Message {
-  // Выключаем светодиод
-  ledPin.Low()
-  return (chan<-*tgbotapi.Message)(ledTurnedOff)
-}
-
 // Открывание двери
 func launchDoor() {
   log.Println("door is beeing opened")
   doorPin.High()
-  ledPin.High()
   time.Sleep(100*time.Millisecond)
   doorPin.Low()
-  ledPin.Low()
+}
+
+func ListenDoor() {
+  for {
+    if doorReadPin.Read() == 0 {
+      doorOpenedByButton <- struct{}
+      time.Sleep(time.Second*3)
+    }
+  }
 }
 
 // Проверяет, является ли указанное сообщение ключевым
@@ -151,19 +142,14 @@ func send(chatId int, msg string) {
   bot.SendMessage(bot_msg)
 }
 
-
 func Listen() {
   for {
     select {
       case msg := <- doorOpened:
         reply := msg.From.FirstName + " открыл(а) дверь"
         send(msg.Chat.ID, reply)
-      case msg := <- ledTurnedOn:
-        reply := msg.From.FirstName + " включил(а) светодиод"
-        send(msg.Chat.ID, reply)
-      case msg := <- ledTurnedOff:
-        reply := msg.From.FirstName + " выключил(а) светодиод"
-        send(msg.Chat.ID, reply)
+      case <- doorOpenedByButton:
+        send(config.MainChatId, "Дверь была открыта")
     }
   }
 }
