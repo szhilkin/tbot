@@ -21,9 +21,8 @@ func main() {
   // Unmap gpio memory when done
   defer rpio.Close()
 
-  pin.Input() 
-  // Pull up and read value
+  pin.Input()
   fmt.Printf("aallal: %d\n", pin.Read())
-  pin.PullUp()
-  fmt.Printf("aallal: %d\n", pin.Read())
+  // pin.PullUp()
+  // fmt.Printf("aallal: %d\n", pin.Read())
 }
