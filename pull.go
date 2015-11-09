@@ -8,7 +8,7 @@ import (
 
 var (
   // Use mcu pin 22, corresponds to GPIO3 on the pi
-  pin = rpio.Pin(22)
+  pin = rpio.Pin(25)
 )
 
 func main() {
@@ -23,6 +23,6 @@ func main() {
 
   pin.Input()
   fmt.Printf("aallal: %d\n", pin.Read())
-  // pin.PullUp()
-  // fmt.Printf("aallal: %d\n", pin.Read())
+  pin.PullUp()
+  fmt.Printf("aallal: %d\n", pin.Read())
 }
