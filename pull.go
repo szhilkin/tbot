@@ -8,7 +8,7 @@ import (
 
 var (
   // Use mcu pin 22, corresponds to GPIO3 on the pi
-  pin = rpio.Pin(9)
+  pin = rpio.Pin(22)
 )
 
 func main() {
