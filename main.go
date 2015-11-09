@@ -103,7 +103,7 @@ func OpenDoor() chan<- *tgbotapi.Message {
 func launchDoor() {
   log.Println("door is beeing opened")
   doorPin.High()
-  time.Sleep(100*time.Millisecond)
+  time.Sleep(1000*time.Millisecond)
   doorPin.Low()
 }
 
