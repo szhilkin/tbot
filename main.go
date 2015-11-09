@@ -78,6 +78,7 @@ func main() {
 
   // Инициализируем все остальные переменные 
   doorOpened = make(chan *tgbotapi.Message)
+  doorOpenedByButton = make(chan struct{})
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
   log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -113,9 +114,7 @@ func ListenDoor() {
     if doorReadPin.Read() == 0 {
       log.Println("Door has been opened")
       doorOpenedByButton <- struct{}{}
-      log.Println("send")
       time.Sleep(time.Second*3)
-      log.Println("time out")
     }
   }
 }
