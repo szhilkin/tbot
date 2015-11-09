@@ -110,6 +110,7 @@ func launchDoor() {
 func ListenDoor() {
   log.Println("Listen door")
   for {
+    log.Printf("Text: %d", doorReadPin.Read())
     if doorReadPin.Read() == 0 {
       log.Println("Door has been opened")
       doorOpenedByButton <- struct{}{}
