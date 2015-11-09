@@ -75,6 +75,7 @@ func main() {
   // Устанавливаем пины на output
   doorPin.Output()
   doorReadPin.Input()
+  doorReadPin.PullUp()
 
   // Инициализируем все остальные переменные 
   doorOpened = make(chan *tgbotapi.Message)
