@@ -108,7 +108,9 @@ func launchDoor() {
 
 func ListenDoor() {
   for {
+    log.Println("Check if door opened")
     if doorReadPin.Read() == 0 {
+      log.Println("Door has been opened")
       doorOpenedByButton <- struct{}
       time.Sleep(time.Second*3)
     }
