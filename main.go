@@ -107,6 +107,7 @@ func launchDoor() {
 }
 
 func ListenDoor() {
+  log.Println("Listen door")
   for {
     log.Println("Check if door opened")
     if doorReadPin.Read() == 0 {
@@ -176,12 +177,6 @@ func ListenUpdates() {
       // По очереди вытаемся выполнить какое-то действие
       if tryToDo(text, OpenDoorPhrases) {
         OpenDoor() <- &update.Message
-      }
-      if tryToDo(text, TurnLedOnPhrases) {
-        TurnLedOn() <- &update.Message
-      }
-      if tryToDo(text, TurnLedOffPhrases) {
-        TurnLedOff() <- &update.Message
       }
     }
   }
