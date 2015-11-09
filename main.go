@@ -113,9 +113,10 @@ func ListenDoor() {
     if doorReadPin.Read() == 0 {
       log.Println("Door has been opened")
       doorOpenedByButton <- struct{}{}
+      log.Println("send")
       time.Sleep(time.Second*3)
+      log.Println("time out")
     }
-    log.Println("out")
   }
 }
 
