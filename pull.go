@@ -22,6 +22,7 @@ func main() {
   defer rpio.Close()
 
   // Pull up and read value
+  fmt.Printf("aallal: %d\n", pin.Read())
   pin.PullUp()
   fmt.Printf("PullUp: %d\n", pin.Read())
 
