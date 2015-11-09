@@ -23,6 +23,4 @@ func main() {
 
   pin.Input()
   fmt.Printf("aallal: %d\n", pin.Read())
-  pin.PullUp()
-  fmt.Printf("aallal: %d\n", pin.Read())
 }
