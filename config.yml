@@ -17,6 +17,10 @@ open_door_phrases:
   - открой
   - сим-сим, откройся
   - abrete sesamo
+  - -o
+  - o
+  - отк
+  - /open
 turn_led_on_phrases:
   - led on
   - test on
