@@ -41,6 +41,7 @@ var MainChatId int
 var doorOpened chan *tgbotapi.Message
 var doorOpenedByButton chan struct{}
 var doorBlocked chan struct{}
+var doorUnblocked chan struct{}
 var doorPin = rpio.Pin(10)
 var doorReadPin = rpio.Pin(25)
 var lockPin = rpio.Pin(9)
@@ -90,6 +91,7 @@ func main() {
   doorOpened = make(chan *tgbotapi.Message)
   doorOpenedByButton = make(chan struct{})
   doorBlocked = make(chan struct{})
+  doorUnblocked = make(chan struct{})
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
   SudoersIds = config.SudoersIds
@@ -169,6 +171,8 @@ func Listen() {
         send(MainChatId, "Дверь была открыта")
       case <- doorBlocked:
         send(MainChatId, "Дверь заблокирована")
+      case <- doorUnblocked:
+        send(MainChatId, "Дверь разблокирована")
     }
   }
 }
@@ -199,16 +203,19 @@ func ListenUpdates() {
         OpenDoor() <- &update.Message
       }
 
+      log.Println(authIds(userId, SudoersIds))
       if authIds(userId, SudoersIds) && tryToDo(text, BlockDoorPhrases) {
         log.Println("door blocked")
         blocked = true
         lockPin.High()
+        doorBlocked <- struct{}{}
       }
 
       if authIds(userId, SudoersIds) && tryToDo(text, UnblockDoorPhrases) {
         log.Println("door unblocked")
         blocked = false
         lockPin.Low()
+        doorUnblocked <- struct{}{}
       }
     }
   }
