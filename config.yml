@@ -29,7 +29,9 @@ open_door_phrases:
   - /open
 block_door_phrases:
   - /block
+  - /lock
   - заблокировать
 unblock_door_phrases:
   - /unblock
+  - /unlock
   - разблокировать
