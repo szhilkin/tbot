@@ -94,6 +94,8 @@ func main() {
   doorUnblocked = make(chan struct{})
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
+  BlockDoorPhrases = config.BlockDoorPhrases
+  UnblockDoorPhrases = config.UnblockDoorPhrases
   SudoersIds = config.SudoersIds
   MainChatId = config.MainChatId
   log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -203,7 +205,6 @@ func ListenUpdates() {
         OpenDoor() <- &update.Message
       }
 
-      log.Println(authIds(userId, SudoersIds))
       if authIds(userId, SudoersIds) && tryToDo(text, BlockDoorPhrases) {
         log.Println("door blocked")
         blocked = true
