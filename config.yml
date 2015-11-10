@@ -5,6 +5,8 @@ allowed_chat_ids:
   - -33208400
 sudoers_ids:
   - 50815686
+  - 162515395
+  - 37975485
 open_door_phrases:
   - open
   - open the door
