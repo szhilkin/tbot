@@ -187,6 +187,9 @@ func ListenUpdates() {
       userId := update.Message.From.ID
       chatID := update.Message.Chat.ID
       text := update.Message.Text
+
+      log.Println(userId)
+      
       // Проверяем является ли этот чат разрешенным
       if !authIds(chatID, AllowedChatIds) {
         reply := "Вам нельзя это делать"
@@ -195,8 +198,6 @@ func ListenUpdates() {
         bot.SendMessage(bot_msg)
         continue
       }
-
-      log.Println(userId)
 
       log.Printf("[%s] %d %s", userName, chatID, text)
       // По очереди вытаемся выполнить какое-то действие
