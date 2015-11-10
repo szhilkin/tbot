@@ -3,6 +3,8 @@ main_chat_id: -33208400
 allowed_chat_ids: 
   - 50815686 
   - -33208400
+sudoers_ids:
+  - 50815686
 open_door_phrases:
   - open
   - open the door
@@ -22,9 +24,9 @@ open_door_phrases:
   - o
   - отк
   - /open
-turn_led_on_phrases:
-  - led on
-  - test on
-turn_led_off_phrases:
-  - led off
-  - test off
+block_door_phrases:
+  - /block
+  - заблокировать
+unblock_door_phrases:
+  - /unblock
+  - разблокировать

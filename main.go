@@ -19,25 +19,32 @@ import (
 
 type Config struct {
   // Токен телеграм бота
-  Token             string `yaml:"token"`
+  Token               string `yaml:"token"`
   // Разрешенные айдишники чатов
-  AllowedChatIds    []int `yaml:"allowed_chat_ids"`
-  MainChatId        int `yaml:"main_chat_id"`
+  AllowedChatIds      []int `yaml:"allowed_chat_ids"`
+  MainChatId          int `yaml:"main_chat_id"`
+  SudoersIds          []int `yaml:"sudoers_ids"`
+  BlockDoorPhrases    []string `yaml:"block_door_phrases"`
+  UnblockDoorPhrases  []string `yaml:"unblock_door_phrases"`
   // Ключевые слова для открытия двери
-  OpenDoorPhrases   []string `yaml:"open_door_phrases"`
+  OpenDoorPhrases     []string `yaml:"open_door_phrases"`
 }
 
 var bot *tgbotapi.BotAPI
 var config *Config
 var OpenDoorPhrases []string
-var TurnLedOnPhrases []string
-var TurnLedOffPhrases []string
+var BlockDoorPhrases []string
+var UnblockDoorPhrases []string
 var AllowedChatIds []int
+var SudoersIds []int
+var MainChatId int
 var doorOpened chan *tgbotapi.Message
 var doorOpenedByButton chan struct{}
+var doorBlocked chan struct{}
 var doorPin = rpio.Pin(10)
 var doorReadPin = rpio.Pin(25)
-// var ledPin = rpio.Pin(9)
+var lockPin = rpio.Pin(9)
+var blocked bool
 
 func readConfig() (*Config, error) {
   var yamlFile []byte
@@ -74,14 +81,19 @@ func main() {
   defer rpio.Close()
   // Устанавливаем пины на output
   doorPin.Output()
+  lockPin.Output()
   doorReadPin.Input()
   doorReadPin.PullUp()
 
   // Инициализируем все остальные переменные 
+  blocked = false
   doorOpened = make(chan *tgbotapi.Message)
   doorOpenedByButton = make(chan struct{})
+  doorBlocked = make(chan struct{})
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
+  SudoersIds = config.SudoersIds
+  MainChatId = config.MainChatId
   log.Printf("Authorized on account %s", bot.Self.UserName)
 
   var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
@@ -131,9 +143,9 @@ func tryToDo(text string, phrases []string) bool {
 }
 
 // Проверяет, является ли указанное сообщение разрешенным
-func auth(chatId int) bool {
-  for i:=0; i<len(AllowedChatIds); i++ {
-    if chatId == AllowedChatIds[i] {
+func authIds(chatId int, AllowedIds []int) bool {
+  for i:=0; i<len(AllowedIds); i++ {
+    if chatId == AllowedIds[i] {
       return true
     }
   }
@@ -154,7 +166,9 @@ func Listen() {
         reply := msg.From.FirstName + " открыл(а) дверь"
         send(msg.Chat.ID, reply)
       case <- doorOpenedByButton:
-        send(config.MainChatId, "Дверь была открыта")
+        send(MainChatId, "Дверь была открыта")
+      case <- doorBlocked:
+        send(MainChatId, "Дверь заблокирована")
     }
   }
 }
@@ -164,10 +178,11 @@ func ListenUpdates() {
     select {
     case update := <-bot.Updates:
       userName := update.Message.From.UserName
+      userId := update.Message.From.ID
       chatID := update.Message.Chat.ID
       text := update.Message.Text
       // Проверяем является ли этот чат разрешенным
-      if !auth(chatID) {
+      if !authIds(chatID, AllowedChatIds) {
         reply := "Вам нельзя это делать"
         log.Println(reply)
         bot_msg := tgbotapi.NewMessage(chatID, reply)
@@ -177,9 +192,23 @@ func ListenUpdates() {
 
       log.Printf("[%s] %d %s", userName, chatID, text)
       // По очереди вытаемся выполнить какое-то действие
-      if tryToDo(text, OpenDoorPhrases) {
+      if tryToDo(text, OpenDoorPhrases) && (blocked == true) {
+        doorBlocked <- struct{}{}
+      } else if tryToDo(text, OpenDoorPhrases) {
         log.Println("door open")
         OpenDoor() <- &update.Message
+      }
+
+      if authIds(userId, SudoersIds) && tryToDo(text, BlockDoorPhrases) {
+        log.Println("door blocked")
+        blocked = true
+        lockPin.High()
+      }
+
+      if authIds(userId, SudoersIds) && tryToDo(text, UnblockDoorPhrases) {
+        log.Println("door unblocked")
+        blocked = false
+        lockPin.Low()
       }
     }
   }
