@@ -116,7 +116,7 @@ func ListenDoor() {
       doorOpenedByButton <- struct{}{}
       time.Sleep(time.Second*3)
     }
-    time.Sleep(time.Millisecond*10)
+    // time.Sleep(time.Millisecond*10)
   }
 }
 
