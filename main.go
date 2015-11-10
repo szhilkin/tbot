@@ -178,6 +178,7 @@ func ListenUpdates() {
       log.Printf("[%s] %d %s", userName, chatID, text)
       // По очереди вытаемся выполнить какое-то действие
       if tryToDo(text, OpenDoorPhrases) {
+        log.Println("door open")
         OpenDoor() <- &update.Message
       }
     }
