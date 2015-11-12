@@ -189,14 +189,14 @@ func Listen() {
         send(MainChatId, "Дверь разблокирована")
       case getTemp:
         temperature, _, _, err :=
-          dht.ReadDHTxxWithRetry(sensorType, dhtPin, false, 10)
+          dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
           send(MainChatId, "Температура: %v градусов", temperature)
         if err != nil {
           log.Fatal(err)
         }
       case getHum:
         _, humidity, _, err :=
-          dht.ReadDHTxxWithRetry(sensorType, dhtPin, false, 10)
+          dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
           send(MainChatId, "Влажность: %v%%", humidity)
         if err != nil {
           log.Fatal(err)
