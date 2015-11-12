@@ -202,8 +202,9 @@ func Listen() {
 }
 
 func ListenDHTsensor() {
+  var err error
   for {
-    temperature, humidity, _, err :=
+    temperature, humidity, _, err =
       dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
     if err != nil {
       log.Fatal(err)
