@@ -189,17 +189,17 @@ func Listen() {
         send(MainChatId, "Дверь заблокирована")
       case <- doorUnblocked:
         send(MainChatId, "Дверь разблокирована")
-      case getTemp:
+      case <- getTemp:
         temperature, _, _, err :=
           dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
-          send(MainChatId, "Температура: %v градусов", temperature)
+          send(MainChatId, fmt.Sprintf("Температура: %v градусов", temperature))
         if err != nil {
           log.Fatal(err)
         }
-      case getHum:
+      case <- getHum:
         _, humidity, _, err :=
           dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
-          send(MainChatId, "Влажность: %v%%", humidity)
+          send(MainChatId, fmt.Sprintf("Влажность: %v%%", humidity))
         if err != nil {
           log.Fatal(err)
         }
