@@ -198,7 +198,7 @@ func Listen() {
       case <- getTemp:
         send(MainChatId, fmt.Sprintf("Температура на борту: %v °C", temperature))
       case <- getHum:
-        send(MainChatId, fmt.Sprintf("Влажность: %v%%", humidity))
+        send(MainChatId, fmt.Sprintf("Влажность на борту: %v%%", humidity))
     }
   }
 }
@@ -211,7 +211,7 @@ func ListenDHTsensor() {
     if err != nil {
       log.Fatal(err)
     }
-    time.Sleep(time.Second*5)
+    time.Sleep(time.Second*10)
   }
 }
 
