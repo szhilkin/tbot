@@ -57,8 +57,8 @@ var lockPin = rpio.Pin(9)
 var blocked bool
 var dhtSensor = dht.DHT11
 var dhtPin = 4
-var temperature = 0
-var humidity = 0
+var temperature float32
+var humidity float32
 
 func readConfig() (*Config, error) {
   var yamlFile []byte
@@ -107,6 +107,8 @@ func main() {
   doorUnblocked = make(chan struct{})
   getTemp = make(chan struct{})
   getHum = make(chan struct{})
+  temperature = 0.0
+  humidity = 0.0
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
   BlockDoorPhrases = config.BlockDoorPhrases
