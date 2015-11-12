@@ -33,6 +33,7 @@ type Config struct {
   OpenDoorPhrases     []string `yaml:"open_door_phrases"`
   GetTempPhrases      []string `yaml:"get_temp_phrases"`
   GetHumPhrases       []string `yaml:"get_hum_phrases"`
+  BlockedIds          []int `yaml:"blocked_ids"`
 }
 
 var bot *tgbotapi.BotAPI
@@ -45,7 +46,9 @@ var UnblockDoorPhrases []string
 var AllowedChatIds []int
 var SudoersIds []int
 var MainChatId int
+var BlockedIds []int
 var doorOpened chan *tgbotapi.Message
+var userBlocked chan *tgbotapi.Message
 var doorOpenedByButton chan struct{}
 var doorBlocked chan struct{}
 var doorUnblocked chan struct{}
@@ -102,6 +105,7 @@ func main() {
   // Инициализируем все остальные переменные 
   blocked = false
   doorOpened = make(chan *tgbotapi.Message)
+  userBlocked = make(chan *tgbotapi.Message)
   doorOpenedByButton = make(chan struct{})
   doorBlocked = make(chan struct{})
   doorUnblocked = make(chan struct{})
@@ -109,6 +113,7 @@ func main() {
   getHum = make(chan struct{})
   temperature = 0.0
   humidity = 0.0
+  BlockedIds = config.BlockedIds
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
   BlockDoorPhrases = config.BlockDoorPhrases
@@ -199,6 +204,9 @@ func Listen() {
         send(MainChatId, fmt.Sprintf("Температура на борту: %v °C", temperature))
       case <- getHum:
         send(MainChatId, fmt.Sprintf("Влажность на борту: %v%%", humidity))
+      case msg := <- userBlocked:
+        reply := msg.From.FirstName + ", извините, но вы заблокированы :("
+        send(msg.Chat.ID, reply)
     }
   }
 }
@@ -225,6 +233,11 @@ func ListenUpdates() {
       text := update.Message.Text
 
       log.Println(userId)
+
+      if authIds(userId, BlockedIds) {
+        userBlocked <- &update.Message
+        continue
+      }
       
       // Проверяем является ли этот чат разрешенным
       if !authIds(chatID, AllowedChatIds) {

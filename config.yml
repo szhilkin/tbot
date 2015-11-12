@@ -3,6 +3,8 @@ main_chat_id: -33208400
 allowed_chat_ids: 
   - 50815686 
   - -33208400
+blocked_ids:
+  - 28215140
 sudoers_ids:
   - 50815686
   - 162515395
