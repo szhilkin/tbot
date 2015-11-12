@@ -57,6 +57,8 @@ var lockPin = rpio.Pin(9)
 var blocked bool
 var dhtSensor = dht.DHT11
 var dhtPin = 4
+var temperature = 0
+var humidity = 0
 
 func readConfig() (*Config, error) {
   var yamlFile []byte
@@ -122,6 +124,7 @@ func main() {
   // Слушаем события
   go Listen()
   go ListenDoor()
+  go ListenDHTsensor()
   ListenUpdates()
 }
 
@@ -191,20 +194,21 @@ func Listen() {
       case <- doorUnblocked:
         send(MainChatId, "Дверь разблокирована")
       case <- getTemp:
-        temperature, _, _, err :=
-          dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
-          send(MainChatId, fmt.Sprintf("Температура: %v градусов", temperature))
-        if err != nil {
-          log.Fatal(err)
-        }
+        send(MainChatId, fmt.Sprintf("Температура на борту: %v °C", temperature))
       case <- getHum:
-        _, humidity, _, err :=
-          dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
-          send(MainChatId, fmt.Sprintf("Влажность: %v%%", humidity))
-        if err != nil {
-          log.Fatal(err)
-        }
+        send(MainChatId, fmt.Sprintf("Влажность: %v%%", humidity))
     }
+  }
+}
+
+func ListenDHTsensor() {
+  for {
+    temperature, humidity, _, err :=
+      dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
+    if err != nil {
+      log.Fatal(err)
+    }
+    time.Sleep(time.Second*5)
   }
 }
 
