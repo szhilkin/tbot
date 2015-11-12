@@ -15,6 +15,8 @@ import (
 
   // Библитека для работы с telegram api
   "github.com/Syfaro/telegram-bot-api"
+
+  "github.com/d2r2/go-dht"
 )
 
 type Config struct {
@@ -28,6 +30,8 @@ type Config struct {
   UnblockDoorPhrases  []string `yaml:"unblock_door_phrases"`
   // Ключевые слова для открытия двери
   OpenDoorPhrases     []string `yaml:"open_door_phrases"`
+  GetTempPhrases      []string `yaml:"get_temp_phrases"`
+  GetHumPhrases       []string `yaml:"get_hum_phrases"`
 }
 
 var bot *tgbotapi.BotAPI
@@ -42,10 +46,14 @@ var doorOpened chan *tgbotapi.Message
 var doorOpenedByButton chan struct{}
 var doorBlocked chan struct{}
 var doorUnblocked chan struct{}
+var getTemp chan struct{}
+var getHum chan struct{}
 var doorPin = rpio.Pin(10)
 var doorReadPin = rpio.Pin(25)
 var lockPin = rpio.Pin(9)
 var blocked bool
+var dhtSensor = dht.DHT11
+var dhtPin = 4
 
 func readConfig() (*Config, error) {
   var yamlFile []byte
@@ -92,9 +100,13 @@ func main() {
   doorOpenedByButton = make(chan struct{})
   doorBlocked = make(chan struct{})
   doorUnblocked = make(chan struct{})
+  getTemp = make(chan struct{})
+  getHum = make(chan struct{})
   AllowedChatIds = config.AllowedChatIds
   OpenDoorPhrases = config.OpenDoorPhrases
   BlockDoorPhrases = config.BlockDoorPhrases
+  GetTempPhrases = config.GetTempPhrases
+  GetHumPhrases = config.GetHumPhrases
   UnblockDoorPhrases = config.UnblockDoorPhrases
   SudoersIds = config.SudoersIds
   MainChatId = config.MainChatId
@@ -175,6 +187,20 @@ func Listen() {
         send(MainChatId, "Дверь заблокирована")
       case <- doorUnblocked:
         send(MainChatId, "Дверь разблокирована")
+      case getTemp:
+        temperature, _, _, err :=
+          dht.ReadDHTxxWithRetry(sensorType, dhtPin, false, 10)
+          send(MainChatId, "Температура: %v градусов", temperature)
+        if err != nil {
+          log.Fatal(err)
+        }
+      case getHum:
+        _, humidity, _, err :=
+          dht.ReadDHTxxWithRetry(sensorType, dhtPin, false, 10)
+          send(MainChatId, "Влажность: %v%%", humidity)
+        if err != nil {
+          log.Fatal(err)
+        }
     }
   }
 }
@@ -206,6 +232,16 @@ func ListenUpdates() {
       } else if tryToDo(text, OpenDoorPhrases) {
         log.Println("door open")
         OpenDoor() <- &update.Message
+      }
+
+      if tryToDo(text, GetTempPhrases) {
+        log.Println("get temperature")
+        getTemp <- struct{}{}
+      }
+
+      if tryToDo(text, GetHumPhrases) {
+        log.Println("get humidity")
+        getHum <- struct{}{}
       }
 
       if authIds(userId, SudoersIds) && tryToDo(text, BlockDoorPhrases) {

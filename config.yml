@@ -35,3 +35,9 @@ unblock_door_phrases:
   - /unblock
   - /unlock
   - разблокировать
+get_temp_phrases:
+  - /temperature
+  - температура
+get_hum_phrases:
+  - /humidity
+  - влажность
