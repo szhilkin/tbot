@@ -200,9 +200,9 @@ func Listen() {
         send(msg.Chat.ID, "Дверь заблокирована")
       case msg := <- doorUnblocked:
         send(msg.Chat.ID, "Дверь разблокирована")
-      case <- getTemp:
+      case msg := <- getTemp:
         send(msg.Chat.ID, fmt.Sprintf("Температура на борту: %v °C", temperature))
-      case <- getHum:
+      case msg := <- getHum:
         send(msg.Chat.ID, fmt.Sprintf("Влажность на борту: %v%%", humidity))
       case msg := <- userBlocked:
         reply := msg.From.FirstName + ", извините, но вы заблокированы :("
