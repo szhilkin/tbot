@@ -38,6 +38,8 @@ var bot *tgbotapi.BotAPI
 var config *Config
 var OpenDoorPhrases []string
 var BlockDoorPhrases []string
+var GetTempPhrases []string
+var GetHumPhrases []string
 var UnblockDoorPhrases []string
 var AllowedChatIds []int
 var SudoersIds []int
