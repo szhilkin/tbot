@@ -50,10 +50,10 @@ var BlockedIds []int
 var doorOpened chan *tgbotapi.Message
 var userBlocked chan *tgbotapi.Message
 var doorOpenedByButton chan struct{}
-var doorBlocked chan struct{}
-var doorUnblocked chan struct{}
-var getTemp chan struct{}
-var getHum chan struct{}
+var doorBlocked chan *tgbotapi.Message
+var doorUnblocked chan *tgbotapi.Message
+var getTemp chan *tgbotapi.Message
+var getHum chan *tgbotapi.Message
 var doorPin = rpio.Pin(10)
 var doorReadPin = rpio.Pin(25)
 var lockPin = rpio.Pin(9)
@@ -107,10 +107,10 @@ func main() {
   doorOpened = make(chan *tgbotapi.Message)
   userBlocked = make(chan *tgbotapi.Message)
   doorOpenedByButton = make(chan struct{})
-  doorBlocked = make(chan struct{})
-  doorUnblocked = make(chan struct{})
-  getTemp = make(chan struct{})
-  getHum = make(chan struct{})
+  doorBlocked = make(chan *tgbotapi.Message)
+  doorUnblocked = make(chan *tgbotapi.Message)
+  getTemp = make(chan *tgbotapi.Message)
+  getHum = make(chan *tgbotapi.Message)
   temperature = 0.0
   humidity = 0.0
   BlockedIds = config.BlockedIds
@@ -196,14 +196,14 @@ func Listen() {
         send(msg.Chat.ID, reply)
       case <- doorOpenedByButton:
         send(MainChatId, "Дверь была открыта")
-      case <- doorBlocked:
-        send(MainChatId, "Дверь заблокирована")
-      case <- doorUnblocked:
-        send(MainChatId, "Дверь разблокирована")
+      case msg := <- doorBlocked:
+        send(msg.Chat.ID, "Дверь заблокирована")
+      case msg := <- doorUnblocked:
+        send(msg.Chat.ID, "Дверь разблокирована")
       case <- getTemp:
-        send(MainChatId, fmt.Sprintf("Температура на борту: %v °C", temperature))
+        send(msg.Chat.ID, fmt.Sprintf("Температура на борту: %v °C", temperature))
       case <- getHum:
-        send(MainChatId, fmt.Sprintf("Влажность на борту: %v%%", humidity))
+        send(msg.Chat.ID, fmt.Sprintf("Влажность на борту: %v%%", humidity))
       case msg := <- userBlocked:
         reply := msg.From.FirstName + ", извините, но вы заблокированы :("
         send(msg.Chat.ID, reply)
@@ -251,7 +251,7 @@ func ListenUpdates() {
       log.Printf("[%s] %d %s", userName, chatID, text)
       // По очереди вытаемся выполнить какое-то действие
       if tryToDo(text, OpenDoorPhrases) && (blocked == true) {
-        doorBlocked <- struct{}{}
+        doorBlocked <- &update.Message
       } else if tryToDo(text, OpenDoorPhrases) {
         log.Println("door open")
         OpenDoor() <- &update.Message
@@ -259,26 +259,26 @@ func ListenUpdates() {
 
       if tryToDo(text, GetTempPhrases) {
         log.Println("get temperature")
-        getTemp <- struct{}{}
+        getTemp <- &update.Message
       }
 
       if tryToDo(text, GetHumPhrases) {
         log.Println("get humidity")
-        getHum <- struct{}{}
+        getHum <- &update.Message
       }
 
       if authIds(userId, SudoersIds) && tryToDo(text, BlockDoorPhrases) {
         log.Println("door blocked")
         blocked = true
         lockPin.High()
-        doorBlocked <- struct{}{}
+        doorBlocked <- &update.Message
       }
 
       if authIds(userId, SudoersIds) && tryToDo(text, UnblockDoorPhrases) {
         log.Println("door unblocked")
         blocked = false
         lockPin.Low()
-        doorUnblocked <- struct{}{}
+        doorUnblocked <- &update.Message
       }
     }
   }
