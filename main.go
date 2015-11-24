@@ -232,6 +232,7 @@ func ListenUpdates() {
       chatID := update.Message.Chat.ID
       text := update.Message.Text
 
+      log.Println(text)
       log.Println(userId)
 
       if authIds(userId, BlockedIds) {
@@ -254,7 +255,15 @@ func ListenUpdates() {
         doorBlocked <- &update.Message
       } else if tryToDo(text, OpenDoorPhrases) {
         log.Println("door open")
-        OpenDoor() <- &update.Message
+        if (text == "откройся, мразь" || text == "откройся мразь") && (string(userName) != "Twizty") {
+          reply := "Ошибка! Только Максиму можно со мной так обращаться!"
+          log.Println(reply)
+          bot_msg := tgbotapi.NewMessage(chatID, reply)
+          bot.SendMessage(bot_msg)
+          continue
+        } else {
+          OpenDoor() <- &update.Message
+        }
       }
 
       if tryToDo(text, GetTempPhrases) {
