@@ -43,3 +43,7 @@ get_temp_phrases:
 get_hum_phrases:
   - /humidity
   - влажность
+door_pin: 10
+door_read_pin: 25
+lock_pin: 9
+dht_pin: 4

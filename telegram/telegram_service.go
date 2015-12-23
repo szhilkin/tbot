@@ -6,7 +6,6 @@ import(
   "bitbucket.com/kaikash/headmade_bot/gpio"
 )
 
-
 var instantiated *TelegramService = nil
 
 type TelegramService struct {
@@ -60,6 +59,8 @@ func (self *TelegramService) Send(chatId int, message string) {
 }
 
 func (self *TelegramService) Listen() {
+  go self.gpioService.Listen(&self.OnOpen)
+  go self.ListenUpdates()
   for {
     select {
       case message := <- self.onSudo:

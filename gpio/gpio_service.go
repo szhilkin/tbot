@@ -8,10 +8,10 @@ import(
 )
 
 type Config struct {
-  doorPin int
-  doorReadPin int
-  lockPin int
-  dhtPin int
+  doorPin int `yaml:"door_pin"`
+  doorReadPin int `yaml:"door_read_pin"`
+  lockPin int `yaml:"lock_pin"`
+  dhtPin int `yaml:"dht_pin"`
 }
 
 type GpioService struct {
@@ -37,9 +37,9 @@ func NewGpioService(configPath string) (*GpioService, error) {
     return nil, err 
   }
   gpioService.Pins = map[string]rpio.Pin{
-    "door": rpio.Pin(10),
-    "doorRead": rpio.Pin(25),
-    "lock": rpio.Pin(9),
+    "door": rpio.Pin(gpioService.config.doorPin),
+    "doorRead": rpio.Pin(gpioService.config.doorReadPin),
+    "lock": rpio.Pin(gpioService.config.lockPin),
   }
   gpioService.blocked = false
   gpioService.dhtSensor = dht.DHT11
@@ -50,11 +50,10 @@ func NewGpioService(configPath string) (*GpioService, error) {
   return gpioService, nil
 } 
 
-func ListenDHTsensor() {
+func (self *GpioService) ListenDHTsensor() {
   var err error
   for {
-    self.temperature, self.humidity, _, err =
-      dht.ReadDHTxxWithRetry(dhtSensor, dhtPin, false, 10)
+    self.temperature, self.humidity, _, err = dht.ReadDHTxxWithRetry(self.dhtSensor, self.config.dhtPin, false, 10)
     if err != nil {
       log.Fatal(err)
     }
@@ -62,22 +61,21 @@ func ListenDHTsensor() {
   }
 }
 
-func ListenDoor() {
+func (self *GpioService) ListenDoor(onOpen <-chan struct{}) {
   log.Println("Listen door")
-  telegramService := telegram.NewTelegramService("", "")
   for {
     if self.Pins["doorRead"].Read() == 0 {
       log.Println("Door has been opened")
-      telegramService.OnOpen <- struct{}{}
+      <- onOpen
       time.Sleep(time.Second*3)
     }
     time.Sleep(time.Millisecond*10)
   }
 }
 
-func (self *GpioService) Listen() {
-  go ListenDHTsensor()
-  go ListenDoor()
+func (self *GpioService) Listen(onOpen <-chan struct{}) {
+  go self.ListenDHTsensor()
+  go self.ListenDoor(onOpen)
   defer rpio.Close()
 }
 
