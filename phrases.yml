@@ -1,0 +1,33 @@
+open_door_phrases:
+  - open
+  - open the door
+  - open door
+  - door open
+  - дверь откройся
+  - открыть дверь
+  - открыть
+  - откройся, мразь
+  - откройся мразь
+  - открыть
+  - откройся
+  - открой
+  - сим-сим, откройся
+  - abrete sesamo
+  - -o
+  - o
+  - отк
+  - /open
+sudo_block_door_phrases:
+  - /block
+  - /lock
+  - заблокировать
+sudo_unblock_door_phrases:
+  - /unblock
+  - /unlock
+  - разблокировать
+get_temp_phrases:
+  - /temperature
+  - температура
+get_hum_phrases:
+  - /humidity
+  - влажность

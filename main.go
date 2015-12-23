@@ -36,32 +36,34 @@ type Config struct {
   BlockedIds          []int `yaml:"blocked_ids"`
 }
 
-var bot *tgbotapi.BotAPI
-var config *Config
-var OpenDoorPhrases []string
-var BlockDoorPhrases []string
-var GetTempPhrases []string
-var GetHumPhrases []string
-var UnblockDoorPhrases []string
-var AllowedChatIds []int
-var SudoersIds []int
-var MainChatId int
-var BlockedIds []int
-var doorOpened chan *tgbotapi.Message
-var userBlocked chan *tgbotapi.Message
-var doorOpenedByButton chan struct{}
-var doorBlocked chan *tgbotapi.Message
-var doorUnblocked chan *tgbotapi.Message
-var getTemp chan *tgbotapi.Message
-var getHum chan *tgbotapi.Message
-var doorPin = rpio.Pin(10)
-var doorReadPin = rpio.Pin(25)
-var lockPin = rpio.Pin(9)
-var blocked bool
-var dhtSensor = dht.DHT11
-var dhtPin = 4
-var temperature float32
-var humidity float32
+var (
+  bot *tgbotapi.BotAPI
+  config *Config
+  OpenDoorPhrases []string
+  BlockDoorPhrases []string
+  GetTempPhrases []string
+  GetHumPhrases []string
+  UnblockDoorPhrases []string
+  AllowedChatIds []int
+  SudoersIds []int
+  MainChatId int
+  BlockedIds []int
+  doorOpened chan *tgbotapi.Message
+  userBlocked chan *tgbotapi.Message
+  doorOpenedByButton chan struct{}
+  doorBlocked chan *tgbotapi.Message
+  doorUnblocked chan *tgbotapi.Message
+  getTemp chan *tgbotapi.Message
+  getHum chan *tgbotapi.Message
+  doorPin = rpio.Pin(10)
+  doorReadPin = rpio.Pin(25)
+  lockPin = rpio.Pin(9)
+  blocked bool
+  dhtSensor = dht.DHT11
+  dhtPin = 4
+  temperature float32
+  humidity float32
+)
 
 func readConfig() (*Config, error) {
   var yamlFile []byte
