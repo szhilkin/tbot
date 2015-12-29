@@ -17,17 +17,22 @@ open_door_phrases:
   - o
   - отк
   - /open
+  - /open@HeadmadeBot
 sudo_block_door_phrases:
   - /block
   - /lock
+  - /lock@HeadmadeBot
   - заблокировать
 sudo_unblock_door_phrases:
   - /unblock
   - /unlock
+  - /unlock@HeadmadeBot
   - разблокировать
 get_temp_phrases:
   - /temperature
+  - /temperature@HeadmadeBot
   - температура
 get_hum_phrases:
   - /humidity
+  - /humidity@HeadmadeBot
   - влажность
