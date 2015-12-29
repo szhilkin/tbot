@@ -70,7 +70,7 @@ func (self *TelegramService) Listen() {
       case <- self.OnOpen:
         chatId := self.config.MainChatId
         log.Println("The door has been opened by button")
-        self.Send(chatId, "Дверь была открыта копочкой")
+        self.Send(chatId, "Дверь была открыта кнопочкой")
     }
   }
 }

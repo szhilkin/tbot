@@ -8,9 +8,9 @@ import(
 )
 
 type Config struct {
-  doorPin int `yaml:"door_pin"`
-  doorReadPin int `yaml:"door_read_pin"`
-  lockPin int `yaml:"lock_pin"`
+  DoorPin int `yaml:"door_pin"`
+  DoorReadPin int `yaml:"door_read_pin"`
+  LockPin int `yaml:"lock_pin"`
   dhtPin int `yaml:"dht_pin"`
 }
 
@@ -37,16 +37,16 @@ func NewGpioService(configPath string) (*GpioService, error) {
     return nil, err 
   }
   gpioService.Pins = map[string]rpio.Pin{
-    "door": rpio.Pin(gpioService.config.doorPin),
-    "doorRead": rpio.Pin(gpioService.config.doorReadPin),
-    "lock": rpio.Pin(gpioService.config.lockPin),
+    "door": rpio.Pin(gpioService.config.DoorPin),
+    "doorRead": rpio.Pin(gpioService.config.DoorReadPin),
+    "lock": rpio.Pin(gpioService.config.LockPin),
   }
   gpioService.blocked = false
   gpioService.dhtSensor = dht.DHT11
   gpioService.Pins["door"].Output()
-  gpioService.Pins["doorRead"].Output()
-  gpioService.Pins["lock"].Input()
-  gpioService.Pins["lock"].PullUp()
+  gpioService.Pins["lock"].Output()
+  gpioService.Pins["doorRead"].Input()
+  gpioService.Pins["doorRead"].PullUp()
   return gpioService, nil
 } 
 
@@ -63,21 +63,21 @@ func (self *GpioService) ListenDHTsensor() {
   }
 }
 
-func (self *GpioService) ListenDoor(onOpen <-chan struct{}) {
+func (self *GpioService) ListenDoor(onOpen chan<- struct{}) {
   log.Println("Listen door")
   for {
     if self.Pins["doorRead"].Read() == 0 {
       log.Println("Door has been opened")
-      <- onOpen
+      onOpen <- struct{}{}
       time.Sleep(time.Second*3)
     }
     time.Sleep(time.Millisecond*10)
   }
 }
 
-func (self *GpioService) Listen(onOpen <-chan struct{}) {
+func (self *GpioService) Listen(onOpen chan<- struct{}) {
   go self.ListenDHTsensor()
-  go self.ListenDoor(onOpen)
+  self.ListenDoor(onOpen)
   defer rpio.Close()
 }
 
@@ -104,14 +104,16 @@ func (self *GpioService) UnlockDoor() error {
 }
 
 func (self *GpioService) GetTemp() (float32, error) {
-  return 1.0, nil
+  return self.temperature, nil
 }
 
 func (self *GpioService) GetHum() (float32, error) {
-  return 1.0, nil
+  return self.humidity, nil
 }
 
-
+func (self *GpioService) IsBlocked() bool {
+  return self.blocked
+}
 
 
 

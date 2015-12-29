@@ -1,3 +1,4 @@
+
 package telegram
 import(
   "log"
@@ -72,11 +73,16 @@ func (self *TelegramService) getHum(message *tgbotapi.Message, gpioService *gpio
 
 func (self *TelegramService) openDoor(message *tgbotapi.Message, gpioService *gpio.GpioService) {
   chatId := message.Chat.ID
-  if err := gpioService.OpenDoor(); err != nil {
-    self.Send(chatId, "К сожалению не получилось открыть дверь :(")
-      log.Println(err)
-      return
+  
+  if gpioService.IsBlocked() == true {
+    self.Send(chatId, "Дверь заперта")
+    return
   }
+  go gpioService.OpenDoor()//; err != nil {
+    //self.Send(chatId, "К сожалению не получилось открыть дверь :(")
+     // log.Println(err)
+     // return
+  //}
   if chatId != self.config.MainChatId {
     go self.Send(self.config.MainChatId, message.From.FirstName + " открыл(а) дверь")
   }
