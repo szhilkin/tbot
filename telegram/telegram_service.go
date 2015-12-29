@@ -55,7 +55,7 @@ func NewTelegramService(configPath, phrasesPath string) (*TelegramService, error
 func (self *TelegramService) Send(chatId int, message string) {
   log.Println(message)
   bot_msg := tgbotapi.NewMessage(chatId, message)
-  self.bot.SendMessage(bot_msg)
+  self.bot.Send(bot_msg)
 }
 
 func (self *TelegramService) Listen() {
