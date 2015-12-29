@@ -76,15 +76,9 @@ func (self *TelegramService) Listen() {
 }
 
 func (self *TelegramService) ListenUpdates() {
-  var(
-    err error
-    updates chan tgbotapi.Update
-  )
-  var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
-  ucfg.Timeout = 60
-  if updates, err = self.bot.GetUpdatesChan(ucfg); err != nil {
-    log.Panic(err)
-  }
+  var u tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
+  u.Timeout = 60
+  updates, _ := self.bot.GetUpdatesChan(u)
   for update := range updates {
     userName, userId, chatId := update.Message.From.UserName, update.Message.From.ID, update.Message.Chat.ID
     if self.IsUserBlocked(userId) {
