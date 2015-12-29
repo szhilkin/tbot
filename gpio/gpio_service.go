@@ -18,7 +18,7 @@ type GpioService struct {
   // onAction chan
   config  *Config
   Pins map[string]rpio.Pin
-  dhtSensor int
+  dhtSensor dht.SensorType
   temperature float32
   humidity float32
   blocked bool
