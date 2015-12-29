@@ -2,8 +2,8 @@ package telegram
 import(
   "log"
   "github.com/Syfaro/telegram-bot-api"
-  "bitbucket.com/kaikash/headmade_bot/config"
-  "bitbucket.com/kaikash/headmade_bot/gpio"
+  "bitbucket.org/kaikash/headmade_bot/config"
+  "bitbucket.org/kaikash/headmade_bot/gpio"
 )
 
 var instantiated *TelegramService = nil

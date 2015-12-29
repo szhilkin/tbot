@@ -5,7 +5,7 @@ import(
   "fmt"
   "time"
   "github.com/Syfaro/telegram-bot-api"
-  "bitbucket.com/kaikash/headmade_bot/gpio"
+  "bitbucket.org/kaikash/headmade_bot/gpio"
 )
 func (self *TelegramService) RunAction(action string, message *tgbotapi.Message) {
   log.Println(action)

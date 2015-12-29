@@ -3,7 +3,7 @@ import(
   "log"
   "time"
   "github.com/stianeikeland/go-rpio"
-  "bitbucket.com/kaikash/headmade_bot/config"
+  "bitbucket.org/kaikash/headmade_bot/config"
   "github.com/d2r2/go-dht"
 )
 

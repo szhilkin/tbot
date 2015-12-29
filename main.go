@@ -1,6 +1,6 @@
 package main
 import(
-  "bitbucket.com/kaikash/headmade_bot/telegram"
+  "bitbucket.org/kaikash/headmade_bot/telegram"
   "log"
 )
 
