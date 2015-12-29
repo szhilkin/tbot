@@ -57,6 +57,8 @@ func (self *GpioService) ListenDHTsensor() {
     if err != nil {
       log.Fatal(err)
     }
+    log.Println(self.temperature)
+    log.Println(self.humidity)
     time.Sleep(time.Second*10)
   }
 }
