@@ -78,24 +78,21 @@ func (self *TelegramService) Listen() {
 func (self *TelegramService) ListenUpdates() {
   var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
   ucfg.Timeout = 60
-  if err := self.bot.UpdatesChan(ucfg); err != nil {
+  if updates, err := self.bot.GetUpdatesChan(ucfg); err != nil {
     log.Panic(err)
   }
-  for {
-    select {
-      case update := <-self.bot.Updates:
-        userName, userId, chatId := update.Message.From.UserName, update.Message.From.ID, update.Message.Chat.ID
-        if self.IsUserBlocked(userId) {
-          go self.Send(chatId, userName + ", извините, но вы заблокированы :(")
-          continue
-        }
-
-        if self.IsChatNotAllowed(chatId) {
-          go self.Send(chatId, userName + ", вам нельзя писать боту в лс, пишите в общий чат")
-        }
-
-        self.phrases.CheckUpdate(&update.Message)
+  for update := range updates {
+    userName, userId, chatId := update.Message.From.UserName, update.Message.From.ID, update.Message.Chat.ID
+    if self.IsUserBlocked(userId) {
+      go self.Send(chatId, userName + ", извините, но вы заблокированы :(")
+      continue
     }
+
+    if self.IsChatNotAllowed(chatId) {
+      go self.Send(chatId, userName + ", вам нельзя писать боту в лс, пишите в общий чат")
+    }
+
+    self.phrases.CheckUpdate(&update.Message)
   }
 }
 
