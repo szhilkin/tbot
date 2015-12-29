@@ -76,9 +76,13 @@ func (self *TelegramService) Listen() {
 }
 
 func (self *TelegramService) ListenUpdates() {
+  var(
+    err error
+    updates chan tgbotapi.Update
+  )
   var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
   ucfg.Timeout = 60
-  if updates, err := self.bot.GetUpdatesChan(ucfg); err != nil {
+  if updates, err = self.bot.GetUpdatesChan(ucfg); err != nil {
     log.Panic(err)
   }
   for update := range updates {
