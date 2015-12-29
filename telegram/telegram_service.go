@@ -59,7 +59,7 @@ func (self *TelegramService) Send(chatId int, message string) {
 }
 
 func (self *TelegramService) Listen() {
-  go self.gpioService.Listen(&self.OnOpen)
+  go self.gpioService.Listen(self.OnOpen)
   go self.ListenUpdates()
   for {
     select {
